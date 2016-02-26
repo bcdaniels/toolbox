@@ -783,15 +783,26 @@ def sortedEig(matrix):
     sortedEigvecs = [ sortedEigvec for (sortedEigval,sortedEigvec) in sortedList]
     return scipy.array(sortedEigvals), scipy.array(sortedEigvecs)
 
+# 2.26.2016 taken from analyzeSparsenessProblem.py
+# 4.19.2011
+def RGBHdecimal2hex(RGBHdecimal):
+    hexList = [ hex(int(256*x-1e-5))[2:] for x in RGBHdecimal ]
+    hx = '#'
+    for h in hexList:
+        if len(h) == 1:
+            hx = hx + '0' + h
+        else:
+            hx = hx + h
+    return hx
 
 # 2.26.2016 taken from analyzeSparsenessProblem.py
 # 3.30.2011
 def drawNetworkFromMatrix(mat,scoreListSize=None,scoreListColor=None,   \
     filename=None,nodeNames=None,cmap=pylab.cm.Greys,                   \
-    nodeShape='ellipse',prog='neato',fontsize=14,                       \
+    nodeShape='ellipse',prog='dot',fontsize=14,                         \
     size=(),**kwargs):
     """
-    prog:       'neato','fdp',
+    prog:       'neato','fdp','dot'
     """
     G = AGraph(maxiter=100000,epsilon=1e-7,**kwargs)
     num = len(mat)
