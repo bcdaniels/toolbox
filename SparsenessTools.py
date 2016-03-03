@@ -799,10 +799,13 @@ def RGBHdecimal2hex(RGBHdecimal):
 # 3.30.2011
 def drawNetworkFromMatrix(mat,scoreListSize=None,scoreListColor=None,   \
     filename=None,nodeNames=None,cmap=pylab.cm.Greys,                   \
-    nodeShape='ellipse',prog='dot',fontsize=14,                         \
+    nodeShape='ellipse',prog='dot',fontsize=14,edgeWidths=None,         \
     size=(),**kwargs):
     """
     prog:       'neato','fdp','dot'
+    
+    See also
+    http://www.graphviz.org/doc/info/attrs.html
     """
     G = AGraph(maxiter=100000,epsilon=1e-7,**kwargs)
     num = len(mat)
@@ -816,6 +819,8 @@ def drawNetworkFromMatrix(mat,scoreListSize=None,scoreListColor=None,   \
         colors = scipy.array(scoreListColor)/max(scoreListColor)*cmap.N
     if nodeNames is None:
         nodeNames = scipy.repeat('',num)
+    if edgeWidths is None:
+        edgeWidths = scipy.ones_like(mat)
     for i in range(num):
       RGBHcolor = cmap(int(colors[i]))
       fillcolor=RGBHdecimal2hex(RGBHcolor)
@@ -829,7 +834,7 @@ def drawNetworkFromMatrix(mat,scoreListSize=None,scoreListColor=None,   \
     for i in range(num):
       for j in range(i+1,num):
         if mat[i,j] > 0.:
-          G.add_edge(i,j,len=mat[i,j])
+          G.add_edge(i,j,len=mat[i,j],penwidth=edgeWidths[i,j])
     if filename is not None:
         G.draw(filename,prog=prog) # 'fdp' or 'neato'
     return G
