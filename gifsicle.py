@@ -10,10 +10,64 @@ from subprocess import call
 import os
 import pylab
 
+def gifsicleAnnotate(fileList,annotateList=None,filename='gifsicle_animation.gif',
+    delay=25,openFile=True):
+    """
+    Dependencies: gifsicle, imagemagick
+    
+    Converts image files in fileList to gif and
+    assembles resulting images into a gif animation.
+    
+    annotateList (None)     : Optional text annotation added to each frame.
+    delay (25)              : Delay between frames in hundredths
+                              of a second.
+    openFile (True)         : Use OSX's "open" command to show the resulting gif
+    """
+    if annotateList is None:
+        annotateList = [ None for file in fileList ]
+    
+    # () convert images to gifs
+    gifFileList = []
+    for file,annotation in zip(fileList,annotateList):
+        
+        # convert to gif using imagemagick's "convert"
+        if annotation is None:
+            call(["convert",file,file+".gif"])
+        else:
+            # convert to gif and add annotation
+            call(["convert",str(file),"label:'"+str(annotation)+"'",
+                  "+swap","-gravity","Center","-append",str(file)+'.gif'])
+        gifFileList.append(file+".gif")
+
+    # () assemble gifs into animation using gifsicle
+    cout = open(filename,'wb')
+    call(["gifsicle","--loop","-d",str(int(delay))]+                \
+         gifFileList,stdout=cout)
+    cout.close()
+    print "gifsicleAnnotate: GIF animation written to "+filename
+
+    # () remove temporary gif files
+    for file in gifFileList:
+        os.remove(file)
+
+    # () open the file externally
+    if openFile:
+        call(["open",filename])
+
+def tempPrefix():
+    """
+    Create temporary folder for intermediate files.
+    """
+    tempFileDir = './.gifsiclePlot/'
+    try: os.mkdir(tempFileDir)
+    except OSError: pass
+    return tempFileDir
+
 # taken from neuralCorrelation.py
 # 2.15.2013
-def gifsiclePlot(plotFunc,argsList,filename='gifsicle_animation.gif',   \
-    newFigures=True,delay=25,openFile=True):
+# 8.28.2016 modified to use more general gifsicleAnnotate
+def gifsiclePlot(plotFunc,argsList,filename='gifsicle_animation.gif',
+    newFigures=True,delay=25,annotateList=None,**kwargs):
     """
     Dependencies: gifsicle, imagemagick
     (It seems that some backends for pylab will create gifs, in
@@ -34,36 +88,21 @@ def gifsiclePlot(plotFunc,argsList,filename='gifsicle_animation.gif',   \
         raise Exception, "Too many args in argsList."
     
     # () make plots and save gifs
-    pid = os.getpid()
     filenameList = []
-    tempFileDir = './.gifsiclePlot/'
-    try: os.mkdir(tempFileDir)
-    except OSError: pass
-    tempFilePrefix = 'gifsiclePlot_temp_'+str(pid)+'_'
+    pid = os.getpid()
+    tempFilePrefix = tempPrefix()+'gifsiclePlot_temp_'+str(pid)+'_'
     for i,args in enumerate(argsList):
         if newFigures: pylab.figure()
         plotFunc(args)
         
         numStr = '%(c)05d' % {'c':i}
-        name = tempFileDir+tempFilePrefix+numStr
+        name = tempFilePrefix+numStr
         pylab.savefig(name+'.png')
         if newFigures: pylab.close()
-        # convert png to gif using imagemagick's "convert"
-        call(["convert",name+".png",name+".gif"])
-        os.remove(name+".png")
-        filenameList.append(name+".gif")
+        filenameList.append(name+".png")
 
-    # () assemble gifs into animation using gifsicle
-    cout = open(filename,'wb')
-    call(["gifsicle","--loop","-d",str(int(delay))]+                \
-         filenameList,stdout=cout)
-    cout.close()
-    print "gifsiclePlot: GIF animation written to "+filename
+    gifsicleAnnotate(filenameList,annotateList,filename=filename,delay=delay,**kwargs)
 
-    # () remove temporary files
-    for file in filenameList:
-        os.remove(file)
-
-    # () open the file externally
-    if openFile:
-        call(["open",filename])
+    # remove temporary files
+    for name in filenameList:
+        os.remove(name)
