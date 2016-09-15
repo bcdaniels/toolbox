@@ -23,7 +23,32 @@ def isingE(fight,J):
     J coming from MPF minimization.
     """
     return sum( dot(dot(fight,J),fight) )
-    
+
+# 5.14.2012
+# 9.15.2014 changed to assume that off-diagonal elements are
+#           counted twice in both representations
+# 3.2.2015 fixing for good!
+# 7.7.2016 moved from criticalPoint.py
+def JplusMinus(JzeroOne):
+    """
+        This assumes H = - sum_i sum_j<>i x_i J_ij x_j
+        """
+    # see 3.19.2012
+    J,h = zeroDiag(JzeroOne),scipy.diag(JzeroOne).copy()
+    #return replaceDiag(0.25*J,sum(0.25*J,axis=0)+0.25*scipy.diag(J))
+    return replaceDiag(J/4.,h/2. + sum(J/2.,axis=0))
+
+# 5.22.2014 (may need checking)
+# 3.2.2015 fixing for good!
+# 7.7.2016 moved from criticalPoint.py
+def JzeroOne(JplusMinus):
+    """
+        This assumes H = - sum_i sum_j<>i x_i J_ij x_j
+        """
+    Jtilde,htilde = zeroDiag(JplusMinus),scipy.diag(JplusMinus).copy()
+    #return replaceDiag(2.*Jtilde,-sum(2.*Jtilde,axis=0)+4.*scipy.diag(Jtilde))
+    return replaceDiag(4.*Jtilde,2.*htilde - 4.*sum(Jtilde,axis=0))
+
 # 11.8.2011
 def isingEmultiple(fights,J):
     """
@@ -1410,20 +1435,18 @@ def fightPossibilities(ell,minSize=0):
 def unsummedZ(J,hext=0,minSize=0):
     """
     J should have h on the diagonal.
-    Probably inefficient (using diag to get rid of useless info)
     """
     return scipy.exp( unsummedLogZ(J,hext=hext,minSize=minSize) )
 
 def unsummedLogZ(J,hext=0,minSize=0):
     """
     J should have h on the diagonal.
-    Probably inefficient (using diag to get rid of useless info)
     """
     ell = len(J)
     h = scipy.diag(J)
     JnoDiag = J - scipy.diag(h)
     fp = scipy.array( fightPossibilities(ell,minSize) )
-    return -dot(fp,h-hext)-1.0*scipy.diag(dot(fp,dot(JnoDiag,fp.T))) #0.5->1.0
+    return -dot(fp,h-hext)-1.0*scipy.sum(dot(fp,JnoDiag)*fp,axis=1)
 
 def freqExpectations(J,hext=0,minSize=0):
     ell = len(J)
@@ -1466,7 +1489,18 @@ def suscExpectation(J,hext=0,minSize=0):
     sizes = sum(fp,axis=1)
     Z = unsummedZ(J,hext,minSize)
     return (dot(sizes**2,Z)/sum(Z) - (dot(sizes,Z)/sum(Z))**2)/ell
-    
+
+# 7.7.2016
+def specificHeatExpectation(J,hext=0,minSize=0):
+    """
+    In units such that k_B T = 1...
+    """
+    ell = len(J)
+    fp = scipy.array( fightPossibilities(ell,minSize) )
+    energies = scipy.sum( dot(fp,J)*fp, axis=1 )
+    Z = unsummedZ(J,hext,minSize)
+    return (dot(energies**2,Z)/sum(Z) - (dot(energies,Z)/sum(Z))**2)/ell
+
 # 8.28.2012
 def tripletExpectations(J,hext=0,minSize=0):
     ell = len(J)
