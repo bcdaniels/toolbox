@@ -67,7 +67,7 @@ def tempPrefix():
 # 2.15.2013
 # 8.28.2016 modified to use more general gifsicleAnnotate
 def gifsiclePlot(plotFunc,argsList,filename='gifsicle_animation.gif',
-    newFigures=True,delay=25,annotateList=None,**kwargs):
+    newFigures=True,delay=25,annotateList=None,figsize=None,**kwargs):
     """
     Dependencies: gifsicle, imagemagick
     (It seems that some backends for pylab will create gifs, in
@@ -92,7 +92,7 @@ def gifsiclePlot(plotFunc,argsList,filename='gifsicle_animation.gif',
     pid = os.getpid()
     tempFilePrefix = tempPrefix()+'gifsiclePlot_temp_'+str(pid)+'_'
     for i,args in enumerate(argsList):
-        if newFigures: pylab.figure()
+        if newFigures: pylab.figure(figsize=figsize)
         plotFunc(args)
         
         numStr = '%(c)05d' % {'c':i}
