@@ -13,7 +13,7 @@ dot,sum = scipy.dot,scipy.sum
 # 11.8.2011
 def metropolisSampleIsing(J,numSamples,T=1.,hext=0.,
                           seed=0,retall=False,nSkip=None,startConfig=None,
-                          burnin=None,minSize=0): #,removeZerosAndOnes=False):
+                          burnin=None,minSize=0):
     """
     Monte carlo Metropolis sampling on {0,1}^ell for Ising model.
     
@@ -33,13 +33,6 @@ def metropolisSampleIsing(J,numSamples,T=1.,hext=0.,
                                   removeZerosAndOnes, which corresponds
                                   to minSize = 2.)
     """
-    # 3.8.2013 including this for paranoia:
-    # remove this warning if you want to use
-    # outside of the fighting monkey case
-    if (minSize < 2):
-        print "**********************************************************"
-        print "metropolisSampleIsing: WARNING: minSize < 2"
-        print "**********************************************************"
     
     if seed is not None:  scipy.random.seed(seed) 
     seed = int(seed)
