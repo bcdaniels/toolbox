@@ -12,6 +12,7 @@ import pylab
 import copy
 from matplotlib.colorbar import ColorbarBase
 from matplotlib.colors import Normalize
+from matplotlib import ticker # to access colorbar ticks
 
 def setDefaultParams(usetex=False):
     # 4.23.2012 for PNAS (sizeMultiple=2)
@@ -25,14 +26,24 @@ def setDefaultParams(usetex=False):
     }
     pylab.rcParams.update(params)
 
-def makePretty(leg=None):
+def makePretty(leg=None,ax=None,cbar=None,cbarNbins=6,frameLW=0.5):
+    if ax is None: ax = pylab.gca()
     # set frame linewidth
-    [i.set_linewidth(0.5) for i in pylab.gca().spines.itervalues()]
+    [i.set_linewidth(frameLW) for i in ax.spines.itervalues()]
     # set tick length
-    pylab.gca().tick_params('both', length=2)
+    ax.tick_params('both',width=frameLW,length=2)
     if leg is not None:
         # set legend frame linewidth
-        leg.get_frame().set_linewidth(0.5)
+        leg.get_frame().set_linewidth(frameLW)
+    if cbar is not None:
+        # same for colorbar
+        ax2 = cbar.ax
+        tick_locator = ticker.MaxNLocator(nbins=cbarNbins)
+        cbar.locator = tick_locator
+        cbar.update_ticks()
+        [i.set_linewidth(frameLW) for i in ax2.spines.itervalues()]
+        cbar.outline.set_linewidth(frameLW)
+        ax2.tick_params(which='both',width=frameLW,length=2)
 
 def texize(string):
     string2 = '\mathrm{'+string.replace(' ',' \: ')+'}'
