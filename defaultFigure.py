@@ -64,3 +64,20 @@ def drawColorbar(cmap,vmin=0.,vmax=1.,                      \
     ax = pylab.axes([left,bottom,width,height])
     c = ColorbarBase(ax,cmap=cmap,norm=Normalize(vmin,vmax))
     pylab.show()
+
+# taken from ellStar.py
+def prettyErrorbar(ax,xList,yList,yerr,**kwargs):
+    """
+    See prettyConfInt for kwargs.
+    """
+    a = pylab.array
+    x,y,err = a(xList),a(yList),a(yerr)
+    prettyConfInt(ax,xList,yList,y-err,y+err,**kwargs)
+
+def prettyConfInt(ax,xList,yList,yListLower,yListUpper,
+                  color='blue',alpha=0.15,marker='',ls='-',lw=2,label=None):
+    ax.plot(xList,yList,color=color,marker=marker,ls=ls,
+            mec=color,label=label,lw=lw)
+    ax.fill_between(xList,yListLower,yListUpper,color=color,alpha=alpha)
+
+
