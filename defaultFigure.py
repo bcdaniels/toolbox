@@ -78,6 +78,6 @@ def prettyConfInt(ax,xList,yList,yListLower,yListUpper,
                   color='blue',alpha=0.15,marker='',ls='-',lw=2,label=None):
     ax.plot(xList,yList,color=color,marker=marker,ls=ls,
             mec=color,label=label,lw=lw)
-    ax.fill_between(xList,yListLower,yListUpper,color=color,alpha=alpha)
+    ax.fill_between(xList,yListLower,yListUpper,facecolors=color,alpha=alpha)
 
 
