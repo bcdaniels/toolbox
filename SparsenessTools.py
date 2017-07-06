@@ -60,7 +60,7 @@ def normSq(vec):
 
 def plotMatrix(mat,cmap=pylab.cm.gray,colorbar=True,X=None,Y=None,          \
     interp='nearest',plot3D=False,plotContour=False,ax=None,                \
-    contours=None,filled=True,outlineColor=None,**kwargs):
+    contours=None,filled=True,outlineColor=None,autoLimits=False,**kwargs):
     """
     some popular cmaps:
         pylab.cm.gray
@@ -133,7 +133,7 @@ def plotMatrix(mat,cmap=pylab.cm.gray,colorbar=True,X=None,Y=None,          \
           Xshifted = scipy.concatenate([[X[0]-deltaX],X]) + deltaX/2.
           Yshifted = scipy.concatenate([[Y[0]-deltaY],Y]) + deltaY/2.
           newAxis = [Xshifted[0],Xshifted[-1],Yshifted[0],Yshifted[-1]]
-          if ax is not None:
+          if (ax is not None) and not autoLimits:
             pylab.axes(ax)
             oldAxis = pylab.axis()
             newAxis = [min(newAxis[0],oldAxis[0]),                          \
