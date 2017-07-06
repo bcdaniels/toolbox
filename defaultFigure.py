@@ -25,11 +25,12 @@ def setDefaultParams(usetex=False):
     }
     pylab.rcParams.update(params)
 
-def makePretty(leg=None):
+def makePretty(leg=None,ax=None):
+    if ax is None: ax = pylab.gca()
     # set frame linewidth
-    [i.set_linewidth(0.5) for i in pylab.gca().spines.itervalues()]
+    [i.set_linewidth(0.5) for i in ax.spines.itervalues()]
     # set tick length
-    pylab.gca().tick_params('both', length=2)
+    ax.tick_params('both', length=2)
     if leg is not None:
         # set legend frame linewidth
         leg.get_frame().set_linewidth(0.5)
