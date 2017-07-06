@@ -1509,7 +1509,21 @@ def tripletExpectations(J,hext=0,minSize=0):
     Z = unsummedZ(J,hext,minSize)
     triplet = dot(tripletp.T,Z)/sum(Z)
     return triplet
-    
+
+# 3.30.2017
+def sumExpectations(J,hext=0,minSize=0):
+    """
+    Returns list corresponding to the probability of each sum,
+    ranging from 0 to len(J).
+    """
+    ell = len(J)
+    fp = scipy.array( fightPossibilities(ell,minSize) )
+    sizes = sum(fp,axis=1)
+    Z = unsummedZ(J,hext,minSize)
+    sumPossibilities = range(0,ell+1)
+    sProbs = [ dot(sizes==s,Z)/sum(Z) for s in sumPossibilities ]
+    return scipy.array( sProbs )
+
 # 7.6.2012
 def findJmatrixAnalytic_CoocMat(coocMatData,Jinit=None,bayesianMean=False,
     numSamples=None,priorLmbda=0.,minSize=0):
