@@ -9,9 +9,11 @@
 #
 
 import pylab
+import scipy
 import copy
 from matplotlib.colorbar import ColorbarBase
 from matplotlib.colors import Normalize
+from matplotlib.colors import LinearSegmentedColormap
 from matplotlib import ticker # to access colorbar ticks
 
 def setDefaultParams(usetex=False):
@@ -79,5 +81,49 @@ def prettyConfInt(ax,xList,yList,yListLower,yListUpper,
     ax.plot(xList,yList,color=color,marker=marker,ls=ls,
             mec=color,label=label,lw=lw)
     ax.fill_between(xList,yListLower,yListUpper,facecolors=color,alpha=alpha)
+
+
+# 10.18.2017 colormap scaling functions taken from plotMutualInfo.py
+
+# 8.31.2012
+# see http://stackoverflow.com/questions/6492514/non-linear-scaling-of-a-colormap-to-enhance-contrast
+def scaledCmap(func,cmap):
+    """
+    func            : A function that maps (0,1) to (0,1).
+                      If it doesn't map 0 to 0 and 1 to 1,
+                      it will be shifted and linearly
+                      scaled to do so.
+    """
+    cdict = cmap._segmentdata
+    cdictNew = copy.copy(cdict)
+    newName = cmap.name + '_scaled'
+    for color in cdict.keys():
+        newList = []
+        for x,y0,y1 in cdict[color]:
+            xnew = scaleTo01(func)(x)
+            newList.append((xnew,y0,y1))
+        cdictNew[color] = newList
+    return LinearSegmentedColormap(newName,cdictNew)
+
+# 8.31.2012
+def contrastCmap(cmap,contrast=10.):
+    scaleFunc = lambda x: scipy.arctanh((2.*x-1.)/(1.+1./contrast))
+    return scaledCmap(scaleFunc,cmap)
+
+# 8.31.2012
+def scaleTo01(func):
+    """
+    Shifts and linearly scales func such that scaledFunc(0) = 0
+    and scaledFunc(1) = 1.
+    
+    Used in scaledCmap.
+    """
+    f = func
+    def gfunc(x):
+        if x <= 0.: return 0.
+        elif x >= 1.: return 1.
+        else:
+            return 0.5*( 1. - (f(0.)+f(1.)-2.*f(x))/(f(1.)-f(0.)) )
+    return gfunc
 
 
