@@ -11,7 +11,7 @@ import os
 import pylab
 
 def gifsicleAnnotate(fileList,annotateList=None,filename='gifsicle_animation.gif',
-    delay=25,openFile=True):
+    delay=25,openFile=True,convertOptions=[]):
     """
     Dependencies: gifsicle, imagemagick
     
@@ -22,6 +22,8 @@ def gifsicleAnnotate(fileList,annotateList=None,filename='gifsicle_animation.gif
     delay (25)              : Delay between frames in hundredths
                               of a second.
     openFile (True)         : Use OSX's "open" command to show the resulting gif
+    convertOptions ([])     : List of strings to pass to imageMagick's 'convert'.
+                              (e.g. ["-resize","1000x1000"])
     """
     if annotateList is None:
         annotateList = [ None for file in fileList ]
@@ -31,18 +33,21 @@ def gifsicleAnnotate(fileList,annotateList=None,filename='gifsicle_animation.gif
     for file,annotation in zip(fileList,annotateList):
         
         # convert to gif using imagemagick's "convert"
+        convertCall = ["convert"]
+        convertCall += convertOptions
         if annotation is None:
-            call(["convert",file,file+".gif"])
+            convertCall += [file,file+".gif"]
         else:
             # convert to gif and add annotation
-            call(["convert",str(file),"label:'"+str(annotation)+"'",
-                  "+swap","-gravity","Center","-append",str(file)+'.gif'])
+            convertCall += [str(file),"label:'"+str(annotation)+"'",
+                  "+swap","-gravity","Center","-append",str(file)+".gif"]
+        call(convertCall)
         gifFileList.append(file+".gif")
 
     # () assemble gifs into animation using gifsicle
     cout = open(filename,'wb')
-    call(["gifsicle","--loop","-d",str(int(delay))]+                \
-         gifFileList,stdout=cout)
+    call(["gifsicle","--disposal","background","--loop","-d",
+         str(int(delay))]+gifFileList,stdout=cout)
     cout.close()
     print "gifsicleAnnotate: GIF animation written to "+filename
 
