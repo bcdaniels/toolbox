@@ -727,10 +727,10 @@ def makeGroupsFigure(groupsList,nameDict,fontsize=12,                   \
 
 # 2.27.2015 stolen from SOC.py
 # stolen from generativeModelFigures.py
-def fightSizeDistributionPlot(samples,color='k',plotConfInt=True,   \
-    plotErrorBars=False,zeroEquiv=1e-10,log=False,alpha=0.4,        \
-    makePlot=True,confIntP=0.95,removeZeros=False,removeOnes=False, \
-    multiple=1,verbose=True,**kwargs):
+def fightSizeDistributionPlot(samples,color='k',plotConfInt=True,
+    plotErrorBars=False,log=False,alpha=0.4,
+    makePlot=True,confIntP=0.95,removeZeros=False,removeOnes=False,
+    multiple=1,verbose=True,maxSize=None,**kwargs):
     """
     multiple (1)            : Multiply probabilities by this 
                               factor.  Useful for plotting expected
@@ -739,7 +739,8 @@ def fightSizeDistributionPlot(samples,color='k',plotConfInt=True,   \
     
     #ell = len(samples[0])
     dist,confIntList = fightSizeDistribution(samples,               \
-        confIntP=confIntP,removeZeros=removeZeros,removeOnes=removeOnes)
+        confIntP=confIntP,removeZeros=removeZeros,removeOnes=removeOnes,
+        maxSize=maxSize)
     ell = len(dist)
     
     dist,confIntList = multiple*dist, multiple*confIntList
