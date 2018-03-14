@@ -23,7 +23,7 @@ def gifsicleAnnotate(fileList,annotateList=None,filename='gifsicle_animation.gif
                               of a second.
     openFile (True)         : Use OSX's "open" command to show the resulting gif
     convertOptions ([])     : List of strings to pass to imageMagick's 'convert'.
-                              (e.g. ["-resize","1000x1000"])
+                              (e.g. ["-resize","1000x1000","-density","1000"])
     """
     if annotateList is None:
         annotateList = [ None for file in fileList ]
