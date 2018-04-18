@@ -13,7 +13,7 @@ import os
 from simplePickle import save,load # currently coming from Dropbox/Research/Conflict
 import pylab
 import scipy.linalg,scipy.optimize
-import scipy.weave
+import weave
 try:
     import scipy.stats # for bootstrappedPval
 except ValueError: # for bizarre error on sidious
@@ -973,11 +973,11 @@ class SparsenessProblem:
                 hess[aInd(c,d),phiInd(A,b)] = crossterm
         
         if True:
-          err = scipy.weave.inline(code,                              \
-            ['hess','aMat','phi','aTa','phiphiT','aPhi','N','m','ell', \
-            'images','lmbda','lmbda2','sigma','sigma2',             \
-            'SDPrimePhi','SDPrimeA'],                               \
-            type_converters = scipy.weave.converters.blitz)
+          err = weave.inline(code,
+            ['hess','aMat','phi','aTa','phiphiT','aPhi','N','m','ell',
+            'images','lmbda','lmbda2','sigma','sigma2',
+            'SDPrimePhi','SDPrimeA'],
+            type_converters = weave.converters.blitz)
         return hess
     
     # 11.18.2010
