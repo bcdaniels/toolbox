@@ -8,3 +8,4 @@
 
 from SparsenessTools import *
 from simplePickle import *
+from binning import *
