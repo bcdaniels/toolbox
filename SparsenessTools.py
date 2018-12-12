@@ -489,6 +489,9 @@ def binomialConfidenceIntervalFreq(Nsuccess,Nsamples,percent=0.95):
     """
     Gives the 95% confidence interval for the frequency parameter of a binomial
     distribution given Nsuccess successes in Nsamples samples.
+    
+    (This may correspond to the 'Clopper-Pearson interval?'  
+    See https://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval )
     """
     betaincinv = scipy.special.betaincinv
     a = 1 + Nsuccess
