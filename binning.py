@@ -8,15 +8,16 @@
 
 import scipy, pylab
 
-def quantileBins(vals,nbins):
+def quantileBins(vals,nbins,inclusiveEndpoints=True):
     """
     Produces edges for bins that include equal numbers of values 
     (or as close to equal as is possible).
     """
     quantiles = [ scipy.percentile(vals,i*100./nbins) for i in range(nbins+1) ]
-    # want end values to include the min and max
-    quantiles[0]  -= 1.
-    quantiles[-1] += 1.
+    if inclusiveEndpoints:
+        # want end values to include the min and max
+        quantiles[0]  -= 1.
+        quantiles[-1] += 1.
     return quantiles
 
 
