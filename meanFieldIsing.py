@@ -7,7 +7,7 @@
 import scipy
 import scipy.optimize
 import pylab
-from SparsenessTools import replaceDiag,zeroDiag
+from .SparsenessTools import replaceDiag,zeroDiag
 
 exp,cosh = scipy.exp,scipy.cosh
 dot = scipy.dot

@@ -25,7 +25,7 @@ if os.uname()[1][:8] != 'vader': # not supported on SFI's vader
 try:
     from pygraphviz import *
 except ImportError:
-    print "SparsenessTools: Could not load pygraphviz."
+    print("SparsenessTools: Could not load pygraphviz.")
 
 # 5.14.2014 moved from LoadFlackTimeSeriesData2011.py
 # 3.4.2011 moved from Sparseness.py
@@ -39,11 +39,11 @@ def shuffle(lst):
 # 1.31.2012
 def replaceDiag(mat,lst):
     if len(scipy.shape(lst)) > 1:
-        raise Exception, "Lst should be 1-dimensional"
+        raise Exception("Lst should be 1-dimensional")
     if scipy.shape(mat) != (len(lst),len(lst)):
-        raise Exception, "Incorrect dimensions."+                   \
+        raise Exception("Incorrect dimensions."+                   \
             "  shape(mat) = "+str(scipy.shape(mat))+                \
-            ", len(lst) = "+str(len(lst))
+            ", len(lst) = "+str(len(lst)))
     return mat - scipy.diag(scipy.diag(mat).copy()).copy()          \
         + scipy.diag(lst).copy()
 
@@ -106,8 +106,8 @@ def plotMatrix(mat,cmap=pylab.cm.gray,colorbar=True,X=None,Y=None,          \
         else: deltaY = 1
         if scipy.any(abs(X[1:]-X[:-1] - deltaX) > 1e-5) or                  \
            scipy.any(abs(Y[1:]-Y[:-1] - deltaY) > 1e-5):
-           print "plotMatrix WARNING: X and/or Y values are not equally "+  \
-                 "spaced.  May produce strange behavior."
+           print("plotMatrix WARNING: X and/or Y values are not equally "+  \
+                 "spaced.  May produce strange behavior.")
           
         if plot3D or plotContour:
           
@@ -240,8 +240,8 @@ def MarkovSteadyState(transitionMatrix,tol=1.e-10):
     valsM = scipy.real_if_close(valsM)
     indices = pylab.find(abs(valsM-1.)<tol)
     if len(indices) != 1:
-        raise Exception, "MarkovPCA: No unique steady-state solution.  " +  \
-            "Check form of transition matrix."
+        raise Exception("MarkovPCA: No unique steady-state solution.  " +  \
+            "Check form of transition matrix.")
     p0 = vecsM[:,indices[0]].T
     p0 = p0/sum(p0)
     
@@ -269,7 +269,7 @@ def fight2number(fightList,useDecimals=False):
     """
     ell = len(fightList[0])
     if (2**ell > sys.maxint) or useDecimals:
-        print "fight2number: Using decimals..."
+        print("fight2number: Using decimals...")
         #decimalNums = [ 2**Decimal(a) for a in range(ell) ]
         nums = [ [f[i]*(2**Decimal(i)) for i in range(ell) ]                \
             for f in fightList ]
@@ -405,7 +405,7 @@ def thresholdFromNumNonzero(mat,numNonzero,sym=False,useAbs=True,aboveDiagOnly=F
         if useAbs: return 0.
         else: return flatAbsMat[-1]
     elif numNonzero > len(flatAbsMat):
-        raise Exception, "Desired numNonzero > number of matrix elements."
+        raise Exception("Desired numNonzero > number of matrix elements.")
     return scipy.mean([flatAbsMat[numNonzero],flatAbsMat[numNonzero-1]])
 
 # 4.8.2011
@@ -465,7 +465,7 @@ def fightSizeDistribution(fightList,normed=True,removeZeros=True,           \
         else:
             ell = int(maxSize)
     else:
-        raise Exception, "Incorrect shape of fightList"
+        raise Exception("Incorrect shape of fightList")
     if removeZeros:
         fightSizes = filter(lambda x: x>0, fightSizes)
     if removeOnes:
@@ -531,11 +531,11 @@ def KLdivergence(pList,qList,skipQzeros=False):
         """
     eps = 1e-5
     if (abs(sum(pList)-1.)>eps) or (abs(sum(qList)-1.)>eps):
-        print "KLdivergence: WARNING: Check normalization of distributions."
-        print "KLdivergence: sum(pList) =",sum(pList)
-        print "KLdivergence: sum(qList) =",sum(qList)
+        print("KLdivergence: WARNING: Check normalization of distributions.")
+        print("KLdivergence: sum(pList) =",sum(pList))
+        print("KLdivergence: sum(qList) =",sum(qList))
     if len(pList) != len(qList):
-        raise Exception, "pList and qList have unequal length."
+        raise Exception("pList and qList have unequal length.")
 
     div = 0.
     for p,q in zip(pList,qList):
@@ -613,9 +613,9 @@ def makeGroupsFigure(groupsList,nameDict,fontsize=12,                   \
                 allSameSign = 0.5*(1.+                                        \
                                    scipy.sign(filteredGroup[0])*scipy.sign(filteredGroup[-1]))
                 if not allSameSign:
-                    print "makeGroupsFigure: WARNING: using eraseNegatives, "   \
+                    print("makeGroupsFigure: WARNING: using eraseNegatives, "   \
                         "but group doesn't have all equal sign: group =",     \
-                        filteredGroup
+                        filteredGroup)
         groupsThresh = abs(groupsThresh)
     
     i = 0
@@ -768,7 +768,7 @@ def fightSizeDistributionPlot(samples,color='k',plotConfInt=True,
         if log: plotFn = pylab.yscale('log')
     
     if verbose:
-        print "sum(dist) =",sum(dist)
+        print("sum(dist) =",sum(dist))
     return dist
 
 
