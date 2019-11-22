@@ -9,14 +9,17 @@
 
 import scipy
 import pylab
-import scipy.weave # for efficient fourth-order matrix calculation
 import sys
-from isingSample import *
-from monteCarloSample import *
-from SparsenessTools import aboveDiagFlat,replaceDiag,cooccurranceMatrixFights,zeroDiag,fightSizeDistribution,KLdivergence
-from meanFieldIsing import JmeanField
+if sys.version_info[0] < 3:
+    import scipy.weave # for efficient fourth-order matrix calculation
+else:
+    print("toolbox.inverseIsing warning: weave is no longer supported")
+from .isingSample import *
+from .monteCarloSample import *
+from .SparsenessTools import aboveDiagFlat,replaceDiag,cooccurranceMatrixFights,zeroDiag,fightSizeDistribution,KLdivergence
+from .meanFieldIsing import JmeanField
 #import dit # for bindingInfo
-from EntropyEstimates import nats2bits
+from .EntropyEstimates import nats2bits
 
 def isingE(fight,J):
     """
@@ -139,8 +142,8 @@ def samplesFromJ(J,numSamples,startConfig=None,nSkip=None,seed=0,           \
     """
     NOTE!  This is old!  Use metropolisSampleIsing, which is 200x faster!
     """
-    print "inverseIsing.samplesFromJ: You probably want to use "            \
-        "generateFightData.metropolisSampleIsing instead, which is much faster."
+    print("inverseIsing.samplesFromJ: You probably want to use "            \
+        "generateFightData.metropolisSampleIsing instead, which is much faster.")
     ell = len(J)
     if nSkip is None: nSkip = ell*10
     if burnin is None: burnin = 10
@@ -412,9 +415,9 @@ def findJmatrixBruteForce(fights,JMPF=None,**kwargs):
     """
     coocMatDesired = cooccurranceMatrixFights(fights,keepDiag=True)
     if JMPF is None:
-        print "findJmatrixBruteForce: running findJmatrixMPF..."
+        print("findJmatrixBruteForce: running findJmatrixMPF...")
         JMPF = findJmatrixMPF(fightsForJMPF,zeroUnseenPairs=False)
-        print "findJmatrixBruteForce: done running findJmatrixMPF."
+        print("findJmatrixBruteForce: done running findJmatrixMPF.")
     return findJmatrixBruteForce_CoocMat(coocMatDesired,                    \
         Jinit=JMPF,offDiagMult=2.,**kwargs)
 
@@ -440,7 +443,7 @@ def leastsqCov(func,x0,cov,Dfun=None,full_output=False,args=(),**kwargs):
         mesg   = convergence message
     """
     if full_output:
-        raise Exception, "full_output is not yet supported"
+        raise Exception("full_output is not yet supported")
     
     U,s,vT = scipy.linalg.svd(cov)
     
@@ -530,7 +533,7 @@ def findJmatrixBruteForce_CoocMat(coocMatData,
         coocMatMean = coocMatData
     
     if priorLmbda != 0.:
-        raise Exception, "11.24.2014 Need to fix prior implementation"
+        raise Exception("11.24.2014 Need to fix prior implementation")
     
     lmbda = priorLmbda / numFights
     
@@ -559,18 +562,18 @@ def findJmatrixBruteForce_CoocMat(coocMatData,
     #thresholdCoocMatErrSq = stopErrFactor*unitErrSq
     
     if numFights is None:
-        print "findJmatrixBruteForce_CoocMat WARNING:"
-        print "    numFights not specified.  Assuming numFights = 1000."
+        print("findJmatrixBruteForce_CoocMat WARNING:")
+        print("    numFights not specified.  Assuming numFights = 1000.")
     if thresholdMeanZSq*numSamples/numFights < 10:
-        print "findJmatrixBruteForce_CoocMat WARNING:"
-        print "    thresholdMeanZSq*numSamples/numFights = "+                   \
-            str(thresholdMeanZSq*numSamples/numFights)+" < 10."
-        print "    Solution may be hard to find (or impossible if < 1)."
+        print("findJmatrixBruteForce_CoocMat WARNING:")
+        print("    thresholdMeanZSq*numSamples/numFights = "+                   \
+            str(thresholdMeanZSq*numSamples/numFights)+" < 10.")
+        print("    Solution may be hard to find (or impossible if < 1).")
     
     # set starting parameters Jinit
     if meanFieldInit:
         if Jinit is not None:
-            raise Exception, "Jinit and meanFieldInit arguments cannot be used simultaneously."
+            raise Exception("Jinit and meanFieldInit arguments cannot be used simultaneously.")
         if meanFieldPriorLmbda is None:
             meanFieldPriorLmbda = priorLmbda
         Jinit = JmeanField(coocMatMean,meanFieldPriorLmbda=meanFieldPriorLmbda,
@@ -639,9 +642,9 @@ def findJmatrixBruteForce_CoocMat(coocMatData,
     while (numiter < maxnumiter) and (coocMatMeanZSq > thresholdMeanZSq):
         if histogramMethod:
             if minimizeCovariance:
-                raise Exception, "minimizeCovariance not yet supported with histogramMethod"
+                raise Exception("minimizeCovariance not yet supported with histogramMethod")
             if not minimizeIndependent:
-                raise Exception, "Only minimizeIndependent is currently supported with histogramMethod"
+                raise Exception("Only minimizeIndependent is currently supported with histogramMethod")
             if samplesAfter is None: # it's our first time through
                 isingSamplesStart = samples(flatJstart,lastFight,numProcs)
             else: # use the samples we calculated after the last iteration
@@ -727,14 +730,14 @@ def findJmatrixBruteForce_CoocMat(coocMatData,
                 m = ell*(ell+1)/2
                 coocMatMeanZSqNoPrior = scipy.mean( numFights * fvec[:m]**2 )
                 # *****
-                print "len(fvec) =",len(fvec)
-                print "ell*(ell+1)/2 =",m
-                print "ell*(ell-1)/2 =",ell*(ell-1)/2
+                print("len(fvec) =",len(fvec))
+                print("ell*(ell+1)/2 =",m)
+                print("ell*(ell-1)/2 =",ell*(ell-1)/2)
                 # *****
-            print "findJmatrixBruteForce_CoocMat: Starting minimization"
-            print "    Initial coocMatMeanZSqNoPrior =",coocMatMeanZSqNoPrior
-            print "                 thresholdMeanZSq =",thresholdMeanZSq
-            print
+            print("findJmatrixBruteForce_CoocMat: Starting minimization")
+            print("    Initial coocMatMeanZSqNoPrior =",coocMatMeanZSqNoPrior)
+            print("                 thresholdMeanZSq =",thresholdMeanZSq)
+            print()
             sys.stdout.flush()
         
         if minimizeCovariance or minimizeIndependent: # old way
@@ -747,7 +750,7 @@ def findJmatrixBruteForce_CoocMat(coocMatData,
                 func(flatJstart,lastFight,Jstart,samplesAfter)**2 )
             sys.stdout.flush()
             if scipy.isnan(coocMatMeanZSq) or scipy.isinf(coocMatMeanZSq):
-                raise Exception, "Encountered non-numerical cost."
+                raise Exception("Encountered non-numerical cost.")
 
             # 5.29.2013 take naive gradient descent step
             if gradDesc:
@@ -764,11 +767,11 @@ def findJmatrixBruteForce_CoocMat(coocMatData,
             # 2.11.2014 (need lmbda \propto 1/numFights)
             coocMatMeanZSq = scipy.mean( numFights * fvec**2 ) 
 
-        print "numiter =",numiter
-        print "numfev =",numfev
-        print mesg
-        print "coocMatMeanZSq/thresholdMeanZSq =",                      \
-                coocMatMeanZSq/thresholdMeanZSq
+        print("numiter =",numiter)
+        print("numfev =",numfev)
+        print(mesg)
+        print("coocMatMeanZSq/thresholdMeanZSq =",                      \
+                coocMatMeanZSq/thresholdMeanZSq)
         sys.stdout.flush()
 
         flatJstart = flatJnew
@@ -776,8 +779,8 @@ def findJmatrixBruteForce_CoocMat(coocMatData,
         numiter += 1
         
     if numiter >= maxnumiter:
-        print "findJmatrixBruteForce_CoocMat: "+                            \
-            "Maximum number of iterations reached ("+str(maxnumiter)+")"
+        print("findJmatrixBruteForce_CoocMat: "+                            \
+            "Maximum number of iterations reached ("+str(maxnumiter)+")")
     
     Jnew = unflatten(flatJnew,ell,symmetrize=True)
     if minimizeCovariance:
@@ -811,7 +814,7 @@ def findJmatrixRegMeanField(coocMatData,
     else: seedIter = seedGenerator(seed,0)
     
     if priorLmbda != 0.:
-        raise Exception, "11.24.2014 Need to fix prior implementation"
+        raise Exception("11.24.2014 Need to fix prior implementation")
         lmbda = priorLmbda / numFights
 
     # 11.21.2014 stuff defining the error model, taken
@@ -892,8 +895,8 @@ def findJmatrixRegMeanField(coocMatData,
             dc = scipy.concatenate([dc,priorTerm])
             
         if verbose:
-            print "findJmatrixRegMeanField: Tried "+str(meanFieldGammaPrime)
-            print "findJmatrixRegMeanField: sum(dc**2) = "+str(scipy.sum(dc**2))
+            print("findJmatrixRegMeanField: Tried "+str(meanFieldGammaPrime))
+            print("findJmatrixRegMeanField: sum(dc**2) = "+str(scipy.sum(dc**2)))
             
         return scipy.sum(dc**2)
 
@@ -925,7 +928,7 @@ def bracket1d(xList,funcList):
     gridMinIndex = scipy.argmin(funcList)
     gridMin = xList[gridMinIndex]
     if (gridMinIndex == 0) or (gridMinIndex == len(xList)-1):
-        raise Exception, "Minimum at boundary"
+        raise Exception("Minimum at boundary")
     gridBracket1 = xList[ scipy.argmin(funcList[:gridMinIndex]) ]
     gridBracket2 = xList[ gridMinIndex + 1 + scipy.argmin(funcList[gridMinIndex+1:]) ]
     gridBracket = (gridBracket1,gridMin,gridBracket2)
@@ -1013,7 +1016,7 @@ def coocSampleCovariance(samples,bayesianMean=True,includePrior=True):
     coocs4 = fourthOrderCoocMat(samples)
     if bayesianMean:
         #coocs4mean = coocMatBayesianMean(coocs4,len(samples))
-        print "coocSampleCovariance : WARNING : using ad-hoc 'Laplace' correction"
+        print("coocSampleCovariance : WARNING : using ad-hoc 'Laplace' correction")
         N = len(samples)
         newDiag = (scipy.diag(coocs4)*N + 1.)/(N + 2.)
         coocs4mean = replaceDiag(coocs4,newDiag)
@@ -1058,9 +1061,9 @@ def residualAnalysis(J,fightData=None,makePlots=False,numSamples=1e5,
         b = dataDict['bruteForceKwargs']
         fittingNumSamples = int(b['numSamples'])
         if numSamples < fittingNumSamples:
-            print "Warning: numSamples ("+str(int(numSamples))+\
-                ") < fittingNumSamples ("+str(fittingNumSamples)+")"
-        print "Sqrt( thresholdMeanZSq ) = %1.3f"%scipy.sqrt(b['thresholdMeanZSq'])
+            print("Warning: numSamples ("+str(int(numSamples))+\
+                ") < fittingNumSamples ("+str(fittingNumSamples)+")")
+        print("Sqrt( thresholdMeanZSq ) = %1.3f"%scipy.sqrt(b['thresholdMeanZSq']))
     
         if b.has_key('minSize'):
             dataDictMinSize = b['minSize']
@@ -1074,13 +1077,13 @@ def residualAnalysis(J,fightData=None,makePlots=False,numSamples=1e5,
             #dataDictRemoveZerosAndOnes = False
             dataDictMinSize = 0
         if minSize != dataDictMinSize:
-            print "Warning: minSize ("+str(minSize)+\
-                ") != dataDictMinSize ("+str(dataDictMinSize)+")"
+            print("Warning: minSize ("+str(minSize)+\
+                ") != dataDictMinSize ("+str(dataDictMinSize)+")")
 
         minCov = False
         if b.has_key('minimizeCovariance'):
             if b['minimizeCovariance']: minCov = True
-        print "minimizeCovariance:",minCov
+        print("minimizeCovariance:",minCov)
       #J = dataDict['J']
     
     ell = len(J)
@@ -1110,14 +1113,14 @@ def residualAnalysis(J,fightData=None,makePlots=False,numSamples=1e5,
     cDesiredDiag = scipy.diag(coocMatBayesianMean( coocMatDesired, numFights))
     cDesiredDiagStdevs = coocStdevsFlat( coocMatDesired, numFights)[:ell]
     zValsDiag = (scipy.diag(c1)-cDesiredDiag)/cDesiredDiagStdevs
-    print "Off-diagonal z-scores: % 1.3f +/- %1.3f"                                 \
-        %(scipy.mean(zVals),scipy.std(zVals))
-    print "Diagonal z-scores:     % 1.3f +/- %1.3f"                                 \
-        %(scipy.mean(zValsDiag),scipy.std(zValsDiag))
+    print("Off-diagonal z-scores: % 1.3f +/- %1.3f"                                 \
+        %(scipy.mean(zVals),scipy.std(zVals)))
+    print("Diagonal z-scores:     % 1.3f +/- %1.3f"                                 \
+        %(scipy.mean(zValsDiag),scipy.std(zValsDiag)))
     cost = scipy.mean( scipy.concatenate((zVals**2,zValsDiag**2)) )
-    print "Average z^2:           % 1.3f"%cost
-    print "Average diag. z^2:     % 1.3f"%scipy.mean(zValsDiag**2)
-    print "Average cooc. z^2:     % 1.3f"%scipy.mean(zVals**2)
+    print("Average z^2:           % 1.3f"%cost)
+    print("Average diag. z^2:     % 1.3f"%scipy.mean(zValsDiag**2))
+    print("Average cooc. z^2:     % 1.3f"%scipy.mean(zVals**2))
 
     # calculate covariance (tilde, with emperical frequencies)
     empiricalFreqs = scipy.diag(coocMatDesired) #scipy.mean(fightData,axis=0)
@@ -1127,27 +1130,27 @@ def residualAnalysis(J,fightData=None,makePlots=False,numSamples=1e5,
     covTildeMean = covarianceTildeMat(samples,empiricalFreqs)
     zValsCov = (aboveDiagFlat(covTildeMean)-aboveDiagFlat(covTildeMeanData))        \
         /covTildeFlatStdevs
-    print "Cov. tilde z-scores:   % 1.3f +/- %1.3f"                                 \
-        %(scipy.mean(zValsCov),scipy.std(zValsCov))
+    print("Cov. tilde z-scores:   % 1.3f +/- %1.3f"                                 \
+        %(scipy.mean(zValsCov),scipy.std(zValsCov)))
     costCov = scipy.mean( scipy.concatenate((zValsCov**2,zValsDiag**2)) )
-    print "Average cov. z^2:      % 1.3f"%costCov
+    print("Average cov. z^2:      % 1.3f"%costCov)
 
     if fightData is not None:
         # do goodness-of-fit calculations
-        print ""
+        print()
         KLmaxSize = 12
         dataSizeDist = fightSizeDistribution(fightData)
         modelSizeDist = fightSizeDistribution(samples)
         KL = KLdivergence(dataSizeDist[:KLmaxSize+1],modelSizeDist[:KLmaxSize+1])
-        print "KL divergence:    % 1.3f"%(KL)
+        print("KL divergence:    % 1.3f"%(KL))
 
         dataFreqs = scipy.mean(fightData,axis=0)
         modelFreqs = scipy.mean(samples,axis=0)
         rFreq,pFreq = scipy.stats.pearsonr(dataFreqs,modelFreqs)
-        print "Frequency rho:    % 1.3f (p = %1.3f)"%(rFreq,pFreq)
+        print("Frequency rho:    % 1.3f (p = %1.3f)"%(rFreq,pFreq))
 
         rCooc,pCooc = scipy.stats.pearsonr(cDesiredFlat,aboveDiagFlat(c1))
-        print "Cooccurrence rho: % 1.3f (p = %1.3f)"%(rCooc,pCooc)
+        print("Cooccurrence rho: % 1.3f (p = %1.3f)"%(rCooc,pCooc))
 
         #cov = covarianceMatrix(samples)
         #covData = covarianceMatrix(fightData)
@@ -1293,10 +1296,10 @@ def findHomogeneousJmatrixBruteForce(fHomog,coocHomog,ell,numSamples=1e5,
         cooc = scipy.mean(aboveDiagFlat(coocMat))
         cov = cooc - f**2
         if verbose:
-            print "findHomogeneousJmatrixBruteForce: h,J =",h,",",J
-            print "findHomogeneousJmatrixBruteForce: f-fHomog =",f-fHomog
-            #print "findHomogeneousJmatrixBruteForce: cov-covHomog =",cov-covHomog
-            print "findHomogeneousJmatrixBruteForce: cooc-coocHomog =",cooc-coocHomog
+            print("findHomogeneousJmatrixBruteForce: h,J =",h,",",J)
+            print("findHomogeneousJmatrixBruteForce: f-fHomog =",f-fHomog)
+            #print("findHomogeneousJmatrixBruteForce: cov-covHomog =",cov-covHomog)
+            print("findHomogeneousJmatrixBruteForce: cooc-coocHomog =",cooc-coocHomog)
         #return ((f-fHomog)/fHomog,(cov-covHomog)/covHomog*scipy.sqrt((ell-1.)/2.))
         return ((f-fHomog),(cooc-coocHomog)*scipy.sqrt((ell-1.)/2.))
 
@@ -1317,7 +1320,7 @@ def findHomogeneousJmatrixBruteForce(fHomog,coocHomog,ell,numSamples=1e5,
         paramsNew,cov_x,infodict,mesg,ier =                             \
             scipy.optimize.leastsq(residualFunc,paramsStart,            \
             maxfev=maxfev,epsfcn=epsfcn,full_output=1)
-        print mesg
+        print(mesg)
     else: # 5.29.2013 try other minimizers
         costFunc = lambda p: scipy.sum(scipy.array(residualFunc(p))**2)
         paramsNew,fopt,func_calls,grad_calls,warnflag,allvecs =         \

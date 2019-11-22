@@ -8,9 +8,9 @@ import scipy
 import copy
 import pylab # for find, filter
 import os # for getpid
-from isingSample import metropolisSampleIsing
+from .isingSample import metropolisSampleIsing
 from subprocess import call, STDOUT
-from simplePickle import load,save
+from .simplePickle import load,save
 
 
     
@@ -41,7 +41,7 @@ def basisMoveFunc(basis,numNonzero):
         randomIndex = scipy.random.randint(len(binaryBasis))
         #*****
         if randomIndex > 47:
-            print "randomIndex =",randomIndex
+            print("randomIndex =",randomIndex)
         #*****
         newState = copy.copy(oldState)
         newState = (newState + binaryBasis[randomIndex])%2
@@ -183,7 +183,7 @@ def monteCarloSample(Efunc,acceptFunc,ell,numSamples,T=1.,              \
                 try:
                     save(d,filename)
                 except:
-                    print "monteCarloSample: Error saving to "+str(filename)
+                    print("monteCarloSample: Error saving to "+str(filename))
     
     samplesList,EList = scipy.array(samplesList),scipy.array(EList)
     if retall:
@@ -241,13 +241,13 @@ def metropolisSample_pypar(type,numprocs,numSamples,retall=False,           \
         os.remove(outputFilename)
         os.remove(prefix+"stdout.txt")
     except IOError:
-        print "metropolisSampleIsing_pypar error:"
+        print("metropolisSampleIsing_pypar error:")
         stdoutFile = open(prefix+"stdout.txt")
         stdout = stdoutFile.read()
-        print stdout
+        print(stdout)
         os.remove(prefix+"stdout.txt")
-        raise Exception, "metropolisSampleIsing_pypar:"                     \
-            + " error in sampleParallel.py"
+        raise Exception("metropolisSampleIsing_pypar:"                     \
+            + " error in sampleParallel.py")
     
     if retall:
         return samples,energies,a
@@ -331,7 +331,7 @@ def sparsenessEfunc(sparsenessProblem,basis,phiStart=None,hext=0.,      \
         scipy.random.seed()
         # from Sparseness.randomPhi
         phiStartNew = 2.*sp.sigma2*(scipy.rand(N,m) - 0.5) 
-        print "sparsenessEfunc: Weird TypeError.  Trying different phiStart."
+        print("sparsenessEfunc: Weird TypeError.  Trying different phiStart.")
         return sparsenessEfunc(sp,basis,phiStart=phiStartNew,hext=hext,     \
             unsummed=unsummed,hextIndivids=hextIndivids)(fight)
       e1,e2,e3 = sp.ENormFunc_unsummed(phi,basis.T,image)

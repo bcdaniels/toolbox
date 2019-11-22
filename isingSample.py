@@ -5,7 +5,11 @@
 #
 
 import scipy
-import scipy.weave
+import sys
+if sys.version_info[0] < 3:
+    import scipy.weave
+else:
+    print("toolbox.isingSample warning: weave is no longer supported")
 import copy
 
 dot,sum = scipy.dot,scipy.sum
@@ -62,7 +66,7 @@ def metropolisSampleIsing(J,numSamples,T=1.,hext=0.,
     else:
         currentState = scipy.array(startConfig,dtype=int)
     if sum(currentState) < minSize:
-        raise Exception, "Cannot start with fewer than minSize participants."
+        raise Exception("Cannot start with fewer than minSize participants.")
     newState = copy.copy(currentState)
     
     currentE = float( sum( dot(dot(currentState,JplusH),currentState) ) )
@@ -151,8 +155,8 @@ def metropolisSampleIsing(J,numSamples,T=1.,hext=0.,
     # 6.25.2014
     acceptanceRatio = float(movesAccepted[0])/totalMoves[0]
     if acceptanceRatio < 1./nSkip:
-        print "metropolisSampleIsing WARNING: "\
-              "acceptance ratio < 1/nSkip (a="+str(acceptanceRatio)+")"
+        print("metropolisSampleIsing WARNING: "\
+              "acceptance ratio < 1/nSkip (a="+str(acceptanceRatio)+")")
     
     #samplesList,EList = scipy.array(samplesList),scipy.array(EList)
     if retall:

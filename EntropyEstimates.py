@@ -5,7 +5,7 @@
 #
 # from WolWol95 and NemShaBia08 
 
-from SparsenessTools import *
+from .SparsenessTools import *
 import scipy
 from scipy.special import gamma,gammaln,polygamma
 from scipy.integrate import quad
@@ -20,7 +20,7 @@ def naiveEntropy(dist):
     """
     eps = 1.e-6
     if abs(1. - sum(dist)) > eps:
-        raise Exception, "Distribution is not normalized."
+        raise Exception("Distribution is not normalized.")
     return -scipy.sum( scipy.nan_to_num(dist*scipy.log2(dist)) )
 
 def meanEntropy(nVec,beta=1,m=None):
@@ -103,9 +103,9 @@ def s2s0NemBetaOld(nVec,beta=1):
             *(deltaPhi(1,nVec[i]+beta+1,N+beta*m+1)             \
              *deltaPhi(1,nVec[j]+beta+1,N+beta*m+1)             \
              -Phi(2,N+beta*m+1))
-    print "Phi(2,N+beta*m+1) =",Phi(2,N+beta*m+1)
-    print "totalOffDiag =",totalOffDiag
-    print "totalDiag =",totalDiag
+    print("Phi(2,N+beta*m+1) =",Phi(2,N+beta*m+1))
+    print("totalOffDiag =",totalOffDiag)
+    print("totalDiag =",totalDiag)
     total = totalDiag + totalOffDiag
     return total / ( (N+beta*m)*(N+beta*m+1) )
     
@@ -135,9 +135,9 @@ def s2s0NemBetaNew(nVec,beta=1):
             *(deltaPhi(1,nVec[i]+beta+1,N+beta*m+2)             \
              *deltaPhi(1,nVec[j]+beta+1,N+beta*m+2)             \
              -Phi(2,N+beta*m+2))
-    print "Phi(2,N+beta*m+1) =",Phi(2,N+beta*m+2)
-    print "totalOffDiag =",totalOffDiag
-    print "totalDiag =",totalDiag
+    print("Phi(2,N+beta*m+1) =",Phi(2,N+beta*m+2))
+    print("totalOffDiag =",totalOffDiag)
+    print("totalDiag =",totalDiag)
     total = totalDiag + totalOffDiag
     return total / ( (N+beta*m)*(N+beta*m+1) )
 
@@ -247,10 +247,10 @@ def betaFromXi(xi,K):
         lambda beta:(xiFromBeta(beta,K) - xi)/xi, betaMin, betaMax,    \
         maxiter=maxiter,xtol=xtol)
     if abs((xiFromBeta(beta,K) - xi)/xi) > 0.01:
-        print "found beta =",beta
-        print "xi desired =",xi
-        print "xi found =",xiFromBeta(beta,K)
-        raise Exception, "Loss of precision in betaFromXi."
+        print("found beta =",beta)
+        print("xi desired =",xi)
+        print("xi found =",xiFromBeta(beta,K))
+        raise Exception("Loss of precision in betaFromXi.")
     return beta
         
 def lnXiDistrib(xi,nVec,K=None):
@@ -311,14 +311,14 @@ def integrateOverXi(func,nVec,maxScaledXi=0.9999,               \
         lnConst = fn(xiMax)
        
         if verbose:
-            print "lnConst =",lnConst
+            print("lnConst =",lnConst)
     else:
         lnConst = 0.
     integrand = lambda xi:                                      \
         exp(lnConst+lnXiDistrib(xi,nVec,K=K))*func(xi)
     if verbose:
-        print "maxBeta = ",betaFromXi(max,K)
-        print "integrating over",min,"< xi <",max
+        print("maxBeta = ",betaFromXi(max,K))
+        print("integrating over",min,"< xi <",max)
     return quad(integrand,min,max,epsrel=1e-10)
     
 def meanEntropyNem(nVec,K=None,verbose=False,**kwargs):
@@ -337,9 +337,9 @@ def meanEntropyNem(nVec,K=None,verbose=False,**kwargs):
         verbose=verbose,**kwargs)
     num,den = numInt[0],denInt[0]
     if verbose:
-        print "num =",num,", den =",den
-        print "numAbsErr =",numInt[1],", denAbsErr =",denInt[1]
-        print "s1s0 =",num/den
+        print("num =",num,", den =",den)
+        print("numAbsErr =",numInt[1],", denAbsErr =",denInt[1])
+        print("s1s0 =",num/den)
     return num/den
     
 def s2s0Nem(nVec,K=None,verbose=False,**kwargs):
@@ -358,9 +358,9 @@ def s2s0Nem(nVec,K=None,verbose=False,**kwargs):
         verbose=verbose,**kwargs)
     num,den = numInt[0],denInt[0]
     if verbose:
-        print "num =",num,", den =",den
-        print "numAbsErr =",numInt[1],", denAbsErr =",denInt[1]
-        print "s2s0 =",num/den
+        print("num =",num,", den =",den)
+        print("numAbsErr =",numInt[1],", denAbsErr =",denInt[1])
+        print("s2s0 =",num/den)
     return num/den
     
     
@@ -378,7 +378,7 @@ def varianceEntropyNem(nVec,**kwargs):
     """
     Flat prior on beta.
     """
-    print "10.26.2010 Not sure if this is correct."
+    print("10.26.2010 Not sure if this is correct.")
     # do we have to integrate s2s0 separately?
     nVec = scipy.array(nVec)
     N = sum(nVec)
@@ -482,7 +482,7 @@ def entropyFightSizeExpansion(fightList):
         meanSlist.append(meanS)
         stdSlist.append(stdS)
         
-        print fightSize, float(sum(nVals))/scipy.sqrt(K), meanS, stdS
+        print(fightSize, float(sum(nVals))/scipy.sqrt(K), meanS, stdS)
         
     fightSizeEnt,stdFightSizeEnt = meanAndStdevEntropyNem(fightSizeNVals)
         
