@@ -22,6 +22,13 @@ def save(obj,filename):
 
 def load(filename):
     fin = io.open(filename,'rb')
-    obj = pickle.load(fin)
+    try:
+        obj = pickle.load(fin)
+    except UnicodeDecodeError:
+        # try using backward-compatible encoding in case
+        # the file was saved using python 2
+        fin.close()
+        fin = io.open(filename,'rb')
+        obj = pickle.load(fin,encoding='bytes')
     fin.close()
     return obj
