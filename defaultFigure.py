@@ -31,7 +31,8 @@ def setDefaultParams(usetex=False):
 def makePretty(leg=None,ax=None,cbar=None,cbarNbins=6,frameLW=0.5):
     if ax is None: ax = pylab.gca()
     # set frame linewidth
-    [i.set_linewidth(frameLW) for i in ax.spines.itervalues()]
+    for axis in ['top','bottom','left','right']:
+        ax.spines[axis].set_linewidth(frameLW)
     # set tick length
     ax.tick_params('both',width=frameLW,length=2)
     if leg is not None:
@@ -43,7 +44,8 @@ def makePretty(leg=None,ax=None,cbar=None,cbarNbins=6,frameLW=0.5):
         tick_locator = ticker.MaxNLocator(nbins=cbarNbins)
         cbar.locator = tick_locator
         cbar.update_ticks()
-        [i.set_linewidth(frameLW) for i in ax2.spines.itervalues()]
+        for axis in ['top','bottom','left','right']:
+            ax2.spines[axis].set_linewidth(frameLW)
         cbar.outline.set_linewidth(frameLW)
         ax2.tick_params(which='both',width=frameLW,length=2)
 
