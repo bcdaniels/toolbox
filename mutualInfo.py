@@ -168,7 +168,7 @@ class conditionalInfo(infoContainer):
         self._calculateNvec(possibleValues=range(ICX.maxVal))
 
 # 7.20.2012
-def mutualInfo(infoContainer1,infoContainer2,verbose=True,
+def mutualInfo(infoContainer1,infoContainer2,verbose=False,
     returnStds=True,**kwargs):
     """
     returnStds (True)       : Also return estimates of the
