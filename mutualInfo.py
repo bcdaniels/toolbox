@@ -130,6 +130,27 @@ class jointInfo(infoContainer):
         self.numTrials = len(self.trialValues)
         self._calculateNvec()
 
+# 2021/6/18
+class conditionalInfo(infoContainer):
+    def __init__(self,infoContainerX,infoContainerY,stateIndexY):
+        """
+        Conditional distribution over X given Y = the state referred to
+        by stateIndexY.
+        
+        (Has currently only been tested with discreteValues infoContainers.)
+        """
+        ICX, ICY = infoContainerX, infoContainerY
+        ICXvals, ICYvals = ICX.trialValues, ICY.trialValues
+        if len(ICXvals) != len(ICYvals):
+            raise Exception("infoContainers must have equal numbers of trials")
+        stateYtrials = find(ICYvals == stateIndexY)
+        
+        self.maxVal = ICX.maxVal
+        self.trialValues = ICX.trialValues[stateYtrials]
+        
+        self.numTrials = len(self.trialValues)
+        self._calculateNvec(possibleValues=range(ICX.maxVal))
+
 # 7.20.2012
 def mutualInfo(infoContainer1,infoContainer2,verbose=True,
     returnStds=True,**kwargs):
