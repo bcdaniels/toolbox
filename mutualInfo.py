@@ -32,15 +32,15 @@ class infoContainer():
             trialVals = self.trialValues
     
         # taken from EntropyEstimates.fights2kxnx "efficient version"
-        tvSorted = np.sort(trialValues)
+        tvSorted = np.sort(trialVals)
         diffJumpLocs = find( (tvSorted[1:]-tvSorted[:-1])>0. )
         nList = list( diffJumpLocs[1:]-diffJumpLocs[:-1] )
         if len(diffJumpLocs) > 0:
             # add for beginning and end
             nList.insert(0,diffJumpLocs[0]+1)
-            nList.append(len(trialValues)-diffJumpLocs[-1]-1)
+            nList.append(len(trialVals)-diffJumpLocs[-1]-1)
         else: # all values are equal
-            nList.append(len(trialValues))
+            nList.append(len(trialVals))
             
         if possibleValues is not None:
             nList = np.array(nList) - 1
