@@ -20,26 +20,39 @@ def find(arr):
 
 # 7.20.2012
 class infoContainer():
+
     def __init__(self,):
         raise notImplementedError
-    def _calculateNvec(self,):
+        
+    def _calculateNvec(self,possibleValues=None):
+        if possibleValues is not None:
+            # ensure each state is counted once, then remove one from each at the end
+            trialVals = list(self.trialValues) + list(possibleValues)
+        else:
+            trialVals = self.trialValues
+    
         # taken from EntropyEstimates.fights2kxnx "efficient version"
-        tvSorted = np.sort(self.trialValues)
+        tvSorted = np.sort(trialValues)
         diffJumpLocs = find( (tvSorted[1:]-tvSorted[:-1])>0. )
         nList = list( diffJumpLocs[1:]-diffJumpLocs[:-1] )
         if len(diffJumpLocs) > 0:
             # add for beginning and end
             nList.insert(0,diffJumpLocs[0]+1)
-            nList.append(len(self.trialValues)-diffJumpLocs[-1]-1)
+            nList.append(len(trialValues)-diffJumpLocs[-1]-1)
         else: # all values are equal
-            nList.append(len(self.trialValues))
+            nList.append(len(trialValues))
+            
+        if possibleValues is not None:
+            nList = np.array(nList) - 1
         self.nVec = np.array(nList)
+        
     def _setupEmpty(self,):
         self.trialValues = []
         self.numTrials = 0
         self.numDimensions = 0
         self.maxVal = 0
         self._calculateNvec()
+        
     def calculateEntropy(self,naive=None,save=True):
         """
         naive (None)        : True uses naive entropy estimation,
