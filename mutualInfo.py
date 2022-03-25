@@ -5,10 +5,6 @@
 #
 # Branched from neural/mutualInfo.py
 #
-# Note that this should eventually be merged with
-# CAS-503-Collectives/neural/informationDecomposition.py
-# (which does not currently use the NSB method, while
-# the below code does)
 #
 
 from . import EntropyEstimates as ent
@@ -89,6 +85,35 @@ class discreteInfo(infoContainer):
         else: self.maxVal = maxVal
         self.numTrials = len(discreteData)
         self._calculateNvec()
+
+# As of 2022/3/25, I'm not sure of the status of this old code implementing
+# binning for continuous-valued data.  May come in handy in the future?
+## 9.7.2012
+#class continuousInfo(infoContainer):
+#    def __init__(self,continuousData,numBins):
+#        """
+#        continuousData      : length = #trials
+#        numBins             : Data is binned into numBins bins of
+#                              equal width.  The first bin has left
+#                              edge at the minimum value in the data;
+#                              the last bin has right edge at the
+#                              maximum value in the data.
+#        """
+#        if np.prod(np.shape(continuousData)) == 0:
+#            self._setupEmpty()
+#            return
+#        if len(np.shape(continuousData)) > 1:
+#            raise Exception("continuousData should have 1 dimension, not "\
+#                +str(len(np.shape(continuousData))))
+#        mn,mx = min(continuousData),max(continuousData)
+#        binEdges = np.linspace(mn,mx,numBins+1)
+#        d = np.digitize(continuousData,binEdges)
+#        # digitize maps max to next bin; fix:
+#        d[find(d==numBins+1)] = numBins
+#        self.trialValues = d - 1
+#        self.maxVal = numBins
+#        self.numTrials = len(continuousData)
+#        self._calculateNvec()
 
 # 7.20.2012
 class jointInfo(infoContainer):
