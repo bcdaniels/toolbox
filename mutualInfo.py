@@ -68,7 +68,10 @@ class infoContainer():
         if naive is None:
             naive = np.all(self.nVec > 10)
         if naive:
+            if hasattr(self,'savedEntropyNaive'):
+                return self.savedEntropyNaive
             entropy = (ent.naiveEntropy(self.nVec/float(sum(self.nVec))),0.)
+            if save: self.savedEntropyNaive = entropy
         else:
             if hasattr(self,'savedEntropy'):
                 return self.savedEntropy
