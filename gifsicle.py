@@ -49,7 +49,7 @@ def gifsicleAnnotate(fileList,annotateList=None,filename='gifsicle_animation.gif
     call(["gifsicle","--disposal","background","--loop","-d",
          str(int(delay))]+gifFileList,stdout=cout)
     cout.close()
-    print "gifsicleAnnotate: GIF animation written to "+filename
+    print("gifsicleAnnotate: GIF animation written to "+filename)
 
     # () remove temporary gif files
     for file in gifFileList:
@@ -90,7 +90,7 @@ def gifsiclePlot(plotFunc,argsList,filename='gifsicle_animation.gif',
     """
     if len(argsList) > 100000:
         # an arbitrary cutoff so that I know I can name temp files
-        raise Exception, "Too many args in argsList."
+        raise(Exception, "Too many args in argsList.")
     
     # () make plots and save gifs
     filenameList = []
