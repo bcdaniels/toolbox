@@ -176,3 +176,56 @@ def synergy(dataY,dataX1,dataX2,naive=True):
     else:
         raise(NotImplementedError("NSB entropy estimation not yet implemented"))
     return joint[0] - MI1[0] - MI2[0] + R[0], synStd
+
+def synergy_simplified_NSB(dataY,dataX1,dataX2,naive=False,warn=True):
+    """
+    Calculate a simplified version of the synergistic info. as given in
+    Timme et al. 2014, equation (32).  This uses a version of the
+    redundancy that assumes that the input that gives the minimum
+    specific information is the same across all output states.
+    
+    Uses the NSB method to estimate entropies (unless naive=True).
+    
+    Returns the mean estimated value and the NSB estimate of the
+    uncertainty in the joint entropy.
+    
+    When warn=True, the redundancy and simplified redundancy are
+    computed using naive probability estimates, and a warning is
+    generated if the two are not equal.
+    
+    Currently only works with discrete datasets.
+    """
+    assert(len(dataY)==len(dataX1))
+    assert(len(dataY)==len(dataX2))
+    
+    infoContainerY = mi.discreteInfo(dataY)
+    infoContainerX1 = mi.discreteInfo(dataX1)
+    infoContainerX2 = mi.discreteInfo(dataX2)
+    
+    joint = mi.mutualInfo(infoContainerY,
+                    mi.jointInfo(infoContainerX1,infoContainerX2),
+                    naive=naive)
+    MI1 = mi.mutualInfo(infoContainerY,infoContainerX1,naive=naive)
+    MI2 = mi.mutualInfo(infoContainerY,infoContainerX2,naive=naive)
+    Rsimplified = min(MI1[0],MI2[0])
+    
+    if warn and not naive:
+        tol = 1e-4
+        MI1naive = mi.mutualInfo(infoContainerY,infoContainerX1,naive=True)
+        MI2naive = mi.mutualInfo(infoContainerY,infoContainerX2,naive=True)
+        RsimplifiedNaive = min(MI1naive[0],MI2naive[0])
+        Rnaive = redundancyContainer(infoContainerY,
+                                     infoContainerX1,
+                                     infoContainerX2,
+                                     naive=True)[0]
+        if abs(Rnaive - RsimplifiedNaive) > tol:
+            print("synergy_simplified_NSB: WARNING: Naive computation produces different")
+            print("    simplified and non-simplified redundancy values.")
+            print("    Rnaive = {}".format(Rnaive))
+            print("    RsimplifiedNaive = {}".format(RsimplifiedNaive))
+    
+    if naive:
+        synStd = 0.
+    else:
+        synStd = joint[1][-1]
+    return joint[0] - MI1[0] - MI2[0] + Rsimplified, synStd
