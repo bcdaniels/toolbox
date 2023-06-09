@@ -50,7 +50,7 @@ def discreteJointInfo(data1,data2,data3,maxVal1=None,maxVal2=None,
     info2 = mi.discreteInfo(data2,maxVal=maxVal2)
     info3 = mi.discreteInfo(data3,maxVal=maxVal3)
     
-    return mi.mutualInfo(info1,jointInfo(info2,info3),**kwargs)
+    return mi.mutualInfo(info1,mi.jointInfo(info2,info3),**kwargs)
 
 def specificInfo(infoContainerY,infoContainerX,stateIndexY,naive=True):
     """
