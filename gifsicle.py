@@ -8,7 +8,12 @@
 
 from subprocess import call
 import os
-import pylab
+import matplotlib.pyplot as plt
+try:
+    from tqdm import tqdm
+    TQDM_INSTALLED = True
+except:
+    TQDM_INSTALLED = False
 
 def gifsicleAnnotate(fileList,annotateList=None,filename='gifsicle_animation.gif',
     delay=25,openFile=True,convertOptions=[]):
@@ -82,9 +87,13 @@ def gifsiclePlot(plotFunc,argsList,filename='gifsicle_animation.gif',
     Runs plotFunc for each set of args in argsList.
     Assembles resulting plots into a gif animation.
     
-    newFigures (True)       : If True, call pylab.figure() before
-                              each call of plotFunc (and 
-                              pylab.close() after).
+    newFigures (True)       : If True, call plt.figure() before
+                              each call of plotFunc (and
+                              plt.close() after).  If plotFunc
+                              optionally returns a pyplot axis
+                              object, this object is cleared
+                              between plots to avoid a memory
+                              leak.
     delay (25)              : Delay between frames in hundredths
                               of a second.
     """
@@ -96,18 +105,31 @@ def gifsiclePlot(plotFunc,argsList,filename='gifsicle_animation.gif',
     filenameList = []
     pid = os.getpid()
     tempFilePrefix = tempPrefix()+'gifsiclePlot_temp_'+str(pid)+'_'
-    for i,args in enumerate(argsList):
-        if newFigures: pylab.figure(figsize=figsize)
-        plotFunc(args)
+    
+    # set up iterator, with tqdm progress bar if available
+    if TQDM_INSTALLED:
+        iter = tqdm(enumerate(argsList),total=len(argsList))
+    else:
+        iter = enumerate(argsList)
+        
+    # iterate over loop to make and save each plot
+    for i,args in iter:
+        if newFigures: plt.figure(figsize=figsize)
+        ax = plotFunc(args)
         
         numStr = '%(c)05d' % {'c':i}
         name = tempFilePrefix+numStr
-        pylab.savefig(name+'.png')
-        if newFigures: pylab.close()
+        plt.savefig(name+'.png')
+        if newFigures:
+            if ax: ax.cla() # clear objects from axis
+            plt.close('all')
         filenameList.append(name+".png")
 
+    # combine plots into animated gif
     gifsicleAnnotate(filenameList,annotateList,filename=filename,delay=delay,**kwargs)
 
     # remove temporary files
     for name in filenameList:
         os.remove(name)
+        
+    if newFigures: plt.close('all')
