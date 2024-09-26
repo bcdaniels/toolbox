@@ -11,6 +11,7 @@
 
 
 import scipy
+import numpy as np
 import os,sys
 import pylab
 import scipy.linalg,scipy.optimize
@@ -38,25 +39,25 @@ def shuffle(lst):
 # 1.17.2013 moved from criticalPoint.py
 # 1.31.2012
 def replaceDiag(mat,lst):
-    if len(scipy.shape(lst)) > 1:
+    if len(np.shape(lst)) > 1:
         raise Exception("Lst should be 1-dimensional")
-    if scipy.shape(mat) != (len(lst),len(lst)):
+    if np.shape(mat) != (len(lst),len(lst)):
         raise Exception("Incorrect dimensions."+                   \
-            "  shape(mat) = "+str(scipy.shape(mat))+                \
+            "  shape(mat) = "+str(np.shape(mat))+                \
             ", len(lst) = "+str(len(lst)))
-    return mat - scipy.diag(scipy.diag(mat).copy()).copy()          \
-        + scipy.diag(lst).copy()
+    return mat - np.diag(np.diag(mat).copy()).copy()          \
+        + np.diag(lst).copy()
 
 # 2.15.2013 moved from branchingProcess.py
 # 2.11.2013
 def zeroDiag(mat):
-    return replaceDiag(mat,scipy.zeros(len(mat)))
+    return replaceDiag(mat,np.zeros(len(mat)))
 
 def arrayFlatten(a):
-    return scipy.resize(a,scipy.prod(scipy.shape(a)))
+    return np.resize(a,np.prod(np.shape(a)))
     
 def normSq(vec):
-    return scipy.sum( vec*vec )
+    return np.sum( vec*vec )
 
 def plotMatrix(mat,cmap=pylab.cm.gray,colorbar=True,X=None,Y=None,          \
     interp='nearest',plot3D=False,plotContour=False,ax=None,                \
@@ -81,7 +82,7 @@ def plotMatrix(mat,cmap=pylab.cm.gray,colorbar=True,X=None,Y=None,          \
     For plot3D, useful kwargs:
         linewidth
     """
-    if len(scipy.shape(mat)) == 1:
+    if len(np.shape(mat)) == 1:
         mat = [mat]
     #minVal,maxVal = max(arrayFlatten(mat)),min(arrayFlatten(mat))
     if (ax is None) and plot3D:
@@ -93,26 +94,26 @@ def plotMatrix(mat,cmap=pylab.cm.gray,colorbar=True,X=None,Y=None,          \
       pylab.axes(ax)
       axNew = ax
     
-    if (plot3D or plotContour) and X is None: X = range(scipy.shape(mat)[1])
-    if (plot3D or plotContour) and Y is None: Y = range(scipy.shape(mat)[0])
+    if (plot3D or plotContour) and X is None: X = range(np.shape(mat)[1])
+    if (plot3D or plotContour) and Y is None: Y = range(np.shape(mat)[0])
     
     if X is not None and Y is not None:
-        X,Y = scipy.array(X),scipy.array(Y)
+        X,Y = np.array(X),np.array(Y)
         
         # shift axes so they align with middle of each component
         if len(X) > 1:  deltaX = X[1] - X[0]
         else: deltaX = 1 
         if len(Y) > 1:  deltaY = Y[1] - Y[0]
         else: deltaY = 1
-        if scipy.any(abs(X[1:]-X[:-1] - deltaX) > 1e-5) or                  \
-           scipy.any(abs(Y[1:]-Y[:-1] - deltaY) > 1e-5):
+        if np.any(abs(X[1:]-X[:-1] - deltaX) > 1e-5) or                  \
+           np.any(abs(Y[1:]-Y[:-1] - deltaY) > 1e-5):
            print("plotMatrix WARNING: X and/or Y values are not equally "+  \
                  "spaced.  May produce strange behavior.")
           
         if plot3D or plotContour:
           
-          Xmesh,Ymesh = scipy.meshgrid(X,Y)
-          Z = scipy.array(mat)
+          Xmesh,Ymesh = np.meshgrid(X,Y)
+          Z = np.array(mat)
           if plotContour:
             if filled:
               contourFn = axNew.contourf3D
@@ -130,8 +131,8 @@ def plotMatrix(mat,cmap=pylab.cm.gray,colorbar=True,X=None,Y=None,          \
               axNew.plot_wireframe(Xmesh,Ymesh,Z,rstride=1,cstride=1,       \
                 **kwargs)
         else:
-          Xshifted = scipy.concatenate([[X[0]-deltaX],X]) + deltaX/2.
-          Yshifted = scipy.concatenate([[Y[0]-deltaY],Y]) + deltaY/2.
+          Xshifted = np.concatenate([[X[0]-deltaX],X]) + deltaX/2.
+          Yshifted = np.concatenate([[Y[0]-deltaY],Y]) + deltaY/2.
           newAxis = [Xshifted[0],Xshifted[-1],Yshifted[0],Yshifted[-1]]
           if (ax is not None) and not autoLimits:
             pylab.axes(ax)
@@ -180,18 +181,18 @@ def PCA(mat):
     number of vectors and m is the length of each vector.
     (singular value decomposition on the covariance matrix)
     """
-    N,m = scipy.shape(mat)
+    N,m = np.shape(mat)
     
     # subtract off mean to get shifted matrix b
-    mn = scipy.mean(mat,axis=0)
-    mnMat = scipy.dot(scipy.ones(N).reshape(N,1),[mn])
+    mn = np.mean(mat,axis=0)
+    mnMat = np.dot(np.ones(N).reshape(N,1),[mn])
     b = mat - mnMat
     
     # DEBUG 10/1/10 REMOVE FOR USUAL PCA
     #b = mat
     
     # find the covariance matrix c
-    c = scipy.dot(b.T,b)/N
+    c = np.dot(b.T,b)/N
     
     # perform singular value decomposition
     U,s,Vh = scipy.linalg.svd(c)
@@ -211,15 +212,15 @@ def MarkovProcess(transitionMatrix,numIter=10,s0=0,seed=0):
     """
     stateList = [s0]
     N = len(transitionMatrix)
-    M = scipy.transpose(transitionMatrix)
-    scipy.random.seed(seed)
+    M = np.transpose(transitionMatrix)
+    np.random.seed(seed)
     s = s0
     for i in range(numIter):
-        stateVec = scipy.zeros((N,1))
+        stateVec = np.zeros((N,1))
         stateVec[s,0] = 1.
-        sNewProbs = scipy.dot(M,stateVec)
-        probSum = scipy.cumsum(sNewProbs)
-        r = scipy.rand()
+        sNewProbs = np.dot(M,stateVec)
+        probSum = np.cumsum(sNewProbs)
+        r = np.random.rand()
         newS = pylab.find(probSum>r)[0]
         stateList.append(newS)
         s = newS
@@ -235,9 +236,9 @@ def MarkovSteadyState(transitionMatrix,tol=1.e-10):
     """
     # find the steady-state probabilities p0 by finding the
     # eigenvector with eigenvalue 1.
-    M = scipy.transpose(transitionMatrix)
+    M = np.transpose(transitionMatrix)
     valsM,vecsM = scipy.linalg.eig(M)
-    valsM = scipy.real_if_close(valsM)
+    valsM = np.real_if_close(valsM)
     indices = pylab.find(abs(valsM-1.)<tol)
     if len(indices) != 1:
         raise Exception("MarkovPCA: No unique steady-state solution.  " +  \
@@ -250,16 +251,16 @@ def MarkovSteadyState(transitionMatrix,tol=1.e-10):
 # 9.8.2010
 def MarkovEntropy(transitionMatrix):
     p0 = MarkovSteadyState(transitionMatrix)
-    sum,log2 = scipy.sum,lambda x: scipy.nan_to_num(scipy.log2(x))
-    return -scipy.real_if_close( sum(p0*log2(p0)) )
+    sum,log2 = np.sum,lambda x: np.nan_to_num(np.log2(x))
+    return -np.real_if_close( sum(p0*log2(p0)) )
 
 # 9.8.2010
 def MarkovMutualInfo(transitionMatrix):
     p0 = MarkovSteadyState(transitionMatrix)
-    #M = scipy.transpose(transitionMatrix)
+    #M = np.transpose(transitionMatrix)
     M = transitionMatrix #***8testing
-    sum,dot,log2 = scipy.sum,scipy.dot,lambda x: scipy.nan_to_num(scipy.log2(x))
-    return scipy.real_if_close( sum(dot(p0,M*log2(M))) - sum(p0*log2(p0)) )
+    sum,dot,log2 = np.sum,np.dot,lambda x: np.nan_to_num(np.log2(x))
+    return np.real_if_close( sum(dot(p0,M*log2(M))) - sum(p0*log2(p0)) )
 
 # 8.27.2010
 # 6.15.2014 updated to use longs (int64)
@@ -273,10 +274,10 @@ def fight2number(fightList,useDecimals=False):
         #decimalNums = [ 2**Decimal(a) for a in range(ell) ]
         nums = [ [f[i]*(2**Decimal(i)) for i in range(ell) ]                \
             for f in fightList ]
-        return scipy.array([ sum(n) for n in nums ])
-    return scipy.sum(                                                       \
-        2**scipy.arange(ell,dtype=long)[::-1]                               \
-        * scipy.array(fightList,dtype=long), axis=1 )
+        return np.array([ sum(n) for n in nums ])
+    return np.sum(                                                       \
+        2**np.arange(ell,dtype=long)[::-1]                               \
+        * np.array(fightList,dtype=long), axis=1 )
     
 
 # 9.8.2010
@@ -284,30 +285,30 @@ def number2fight(stateList,numIndividuals):
     """
     Returns the 'base-2 fight' corresponding to the base-10 number.
     """
-    return [ [int(bit) for bit in scipy.binary_repr(state,numIndividuals)]  \
+    return [ [int(bit) for bit in np.binary_repr(state,numIndividuals)]  \
         for state in stateList ]
 
 # 2.28.2011
 def numDistinctFights(fightList):
-    fightNumbers = scipy.sort(fight2number(fightList))
+    fightNumbers = np.sort(fight2number(fightList))
     return 1+sum(fightNumbers[:-1]-fightNumbers[1:]<0)
 
     
 # 10.26.2010
 # 7.19.2011 see also EntropyEstimates.fights2kxnx
 def freqDataFromFightList(fightList):
-    if len(scipy.shape(fightList)) == 1: 
+    if len(np.shape(fightList)) == 1:
         # 4.2.2012 single individual 'fights'
         fightNumberList = fightList
-        histData = scipy.histogram(fightNumberList,                     \
+        histData = np.histogram(fightNumberList,                     \
             bins=range(0,3))[0]
     else: #elif len(fightList[0])>1: # changed 6.5.2012
         fightNumberList = fight2number(fightList)
-        histData = scipy.histogram(fightNumberList,                     \
+        histData = np.histogram(fightNumberList,                     \
             bins=range(0,2**len(fightList[0])+1))[0]
     #else: # 4.2.2012 not sure what this part is supposed to do...
     #    fightNumberList = fightList
-    #    histData = scipy.histogram(fightNumberList,                     \
+    #    histData = np.histogram(fightNumberList,                     \
     #        bins=range(0,max(fightNumberList)+1))[0]
     
     #freqData = histData/float(sum(histData))
@@ -322,26 +323,26 @@ def entropyNaive(fightList,newMethod=True):
     if newMethod: # 4.6.2011
       count = 0
       freqData = []
-      fightNums = scipy.sort(fight2number(fightList))
-      diffs = scipy.concatenate([fightNums[:-1]-fightNums[1:],[-1]])
+      fightNums = np.sort(fight2number(fightList))
+      diffs = np.concatenate([fightNums[:-1]-fightNums[1:],[-1]])
       for diff in diffs:
         count += 1
         if diff < 0: # it's a new fight
             freqData.append(count)
             count = 0
-      freqData = scipy.array(freqData)
+      freqData = np.array(freqData)
     else:
       freqData = freqDataFromFightList(fightList)
     return entropyFreqListNaive(freqData/float(sum(freqData)))
 
 # 2.22.2011
 def GSOrthogonalize(mat):
-    dot = scipy.dot
+    dot = np.dot
     OMat = []
     for v in mat:
-        vOutsideOMat = scipy.sum([u * dot(v,u)/dot(u,u) for u in OMat],axis=0)
+        vOutsideOMat = np.sum([u * dot(v,u)/dot(u,u) for u in OMat],axis=0)
         u = v - vOutsideOMat
-        OMat.append(u/scipy.sqrt(sum(u*u)))
+        OMat.append(u/np.sqrt(sum(u*u)))
     return OMat
 
 # 9.1.2011
@@ -392,21 +393,21 @@ def thresholdFromNumNonzero(mat,numNonzero,sym=False,useAbs=True,aboveDiagOnly=F
                 nonzero elements at or below the diagonal.
     """
     if sym:
-        mat = scipy.tri(len(mat))*mat
+        mat = np.tri(len(mat))*mat
     if useAbs: absMat = abs(mat)
     else: absMat = mat
     if not aboveDiagOnly:
-        flatAbsMat = scipy.sort(arrayFlatten(absMat))[::-1]
+        flatAbsMat = np.sort(arrayFlatten(absMat))[::-1]
     else:
-        flatAbsMat = scipy.sort(aboveDiagFlat(absMat))[::-1]
+        flatAbsMat = np.sort(aboveDiagFlat(absMat))[::-1]
     if numNonzero < 1:
-        return scipy.inf
+        return np.inf
     elif numNonzero == len(flatAbsMat):
         if useAbs: return 0.
         else: return flatAbsMat[-1]
     elif numNonzero > len(flatAbsMat):
         raise Exception("Desired numNonzero > number of matrix elements.")
-    return scipy.mean([flatAbsMat[numNonzero],flatAbsMat[numNonzero-1]])
+    return np.mean([flatAbsMat[numNonzero],flatAbsMat[numNonzero-1]])
 
 # 4.8.2011
 # 8.16.2012 moved from generateFightData.py
@@ -419,23 +420,23 @@ def aboveDiagFlat(mat,keepDiag=False,offDiagMult=None):
     """
     m = copy.copy(mat)
     if offDiagMult is not None:
-        m *= offDiagMult*(1.-scipy.tri(len(m)))+scipy.diag(scipy.ones(len(m))) 
+        m *= offDiagMult*(1.-np.tri(len(m)))+np.diag(np.ones(len(m)))
     if keepDiag: begin=0
     else: begin=1
-    return scipy.concatenate([ scipy.diagonal(m,i)                          \
+    return np.concatenate([ np.diagonal(m,i)                          \
                               for i in range(begin,len(m)) ])
 
 # 3.17.2014 copied from SparsenessPrediction.py
 # 3.10.2011 taken out of checkPredictions
 def covarianceMatrix(fights):
     """
-    Equivalent to scipy.cov(fights,rowvar=0,ddof=0)
+    Equivalent to np.cov(fights,rowvar=0,ddof=0)
     """
-    fights = scipy.array(fights)
-    meanFight = scipy.mean(fights,axis=0)
+    fights = np.array(fights)
+    meanFight = np.mean(fights,axis=0)
     # 1.27.2011 make sure PCA is doing what I think it is
-    meanMat = ( meanFight*scipy.ones_like(fights) ).T
-    c = scipy.dot(fights.T-meanMat,(fights.T-meanMat).T) / len(fights)
+    meanMat = ( meanFight*np.ones_like(fights) ).T
+    c = np.dot(fights.T-meanMat,(fights.T-meanMat).T) / len(fights)
     return c
 
 # 3.17.2014 copied from generateFightData.py
@@ -454,10 +455,10 @@ def fightSizeDistribution(fightList,normed=True,removeZeros=True,           \
     sizes.)  Bins range from 0 to maxSize.
     
     """
-    if len(scipy.shape(fightList)) == 2:
+    if len(np.shape(fightList)) == 2:
         ell = len(fightList[0])
-        fightSizes = scipy.sum(fightList,axis=1)
-    elif len(scipy.shape(fightList)) == 1:
+        fightSizes = np.sum(fightList,axis=1)
+    elif len(np.shape(fightList)) == 1:
         # 10.30.2012 allow to directly pass fight sizes
         fightSizes = fightList
         if maxSize is None:
@@ -470,10 +471,10 @@ def fightSizeDistribution(fightList,normed=True,removeZeros=True,           \
         fightSizes = filter(lambda x: x>0, fightSizes)
     if removeOnes:
         fightSizes = filter(lambda x: x!=1, fightSizes)
-    hist = scipy.histogram(fightSizes,bins=range(ell+2),normed=False)[0]
+    hist = np.histogram(fightSizes,bins=range(ell+2),normed=False)[0]
     N = sum(hist)
     if confIntP is not None: # calculate confidence intervals
-        confIntList = scipy.array(                                          \
+        confIntList = np.array(                                          \
             [ binomialConfidenceIntervalFreq(n,N,confIntP) for n in hist ] )
         if normed:
             #confIntList = confIntList/N
@@ -508,12 +509,12 @@ def cooccurranceMatrixFights(fightList,normed=True,keepDiag=False):
     normed (True)           : Normalize such that the sum of the matrix = 1.
     : 4.11.2011 changed to divide by number of fights
     """
-    fightList = scipy.array(fightList,dtype=float)
-    mat = scipy.dot(fightList.T,fightList)
+    fightList = np.array(fightList,dtype=float)
+    mat = np.dot(fightList.T,fightList)
     if keepDiag: k=-1
     else: k=0
-    mat *= (1 - scipy.tri(len(mat),k=k)) # only above diagonal
-    if normed: mat /= float(len(fightList)) # mat /= scipy.sum(mat)
+    mat *= (1 - np.tri(len(mat),k=k)) # only above diagonal
+    if normed: mat /= float(len(fightList)) # mat /= np.sum(mat)
     return mat
 
 # 3.19.2014 copied from generateFightData.py
@@ -544,11 +545,11 @@ def KLdivergence(pList,qList,skipQzeros=False):
         elif (q == 0.) and skipQzeros:
             div += 0.
         elif (q == 0.) and not skipQzeros:
-            return scipy.nan
+            return np.nan
         else:
-            div += p*scipy.log2(p/q)
+            div += p*np.log2(p/q)
     return div
-#return scipy.sum(pList*scipy.log2(pList/qList))
+#return np.sum(pList*np.log2(pList/qList))
 
 
 # 4.14.2014 moved from analyzeSparsenessProblem.py
@@ -608,10 +609,10 @@ def makeGroupsFigure(groupsList,nameDict,fontsize=12,                   \
     
     if eraseNegatives:
         for group in groupsThresh:
-            filteredGroup = scipy.sort( filter(lambda x:abs(x)>0.,group) )
+            filteredGroup = np.sort( filter(lambda x:abs(x)>0.,group) )
             if len(filteredGroup) > 0.:
                 allSameSign = 0.5*(1.+                                        \
-                                   scipy.sign(filteredGroup[0])*scipy.sign(filteredGroup[-1]))
+                                   np.sign(filteredGroup[0])*np.sign(filteredGroup[-1]))
                 if not allSameSign:
                     print("makeGroupsFigure: WARNING: using eraseNegatives, "   \
                         "but group doesn't have all equal sign: group =",     \
@@ -621,16 +622,16 @@ def makeGroupsFigure(groupsList,nameDict,fontsize=12,                   \
     i = 0
     #for rule in rules:
     for groupIndex,group in enumerate(groupsThresh):
-        #mags = abs(scipy.array(rule[-1]))
+        #mags = abs(np.array(rule[-1]))
         mags = filter(lambda x: abs(x)>0, group)
         
         if len(mags) > 0:
             magsR = mags/maxAbsMag*cmap.N
-            #names = scipy.array(rule[0][0])
-            nonzeroIndices = scipy.array( filter(lambda x: x>0,             \
-                                                 (scipy.arange(len(group))+1)*(abs(group)>0)) ) - 1
-            names = scipy.array([ nameDict[ind] for ind in nonzeroIndices ])
-            srt = scipy.argsort(-magsR)
+            #names = np.array(rule[0][0])
+            nonzeroIndices = np.array( filter(lambda x: x>0,             \
+                                                 (np.arange(len(group))+1)*(abs(group)>0)) ) - 1
+            names = np.array([ nameDict[ind] for ind in nonzeroIndices ])
+            srt = np.argsort(-magsR)
             if sortByMag:
                 magsR = magsR[srt]
                 names = names[srt]
@@ -758,7 +759,7 @@ def fightSizeDistributionPlot(samples,color='k',plotConfInt=True,
                 confIntList[:,0][1:firstZero],                           \
                 confIntList[:,1][1:firstZero],color=color,alpha=alpha)
         if plotErrorBars:
-            yerr = scipy.empty_like(confIntList.T)
+            yerr = np.empty_like(confIntList.T)
             yerr[0] = dist - confIntList[:,1]
             yerr[1] = confIntList[:,0] - dist
             pylab.errorbar(range(ell),dist,yerr=yerr,color=color)
@@ -781,11 +782,11 @@ def sortedEig(matrix):
     eigenvector with the smallest eigenvalue.)
     """
     eigvals,eigvecs = scipy.linalg.eig(matrix)
-    sortedList = sorted( zip(eigvals,scipy.transpose(eigvecs)),                 \
+    sortedList = sorted( zip(eigvals,np.transpose(eigvecs)),                 \
                         key=lambda tup: tup[0] )
     sortedEigvals = [ sortedEigval for (sortedEigval,sortedEigvec) in sortedList]
     sortedEigvecs = [ sortedEigvec for (sortedEigval,sortedEigvec) in sortedList]
-    return scipy.array(sortedEigvals), scipy.array(sortedEigvecs)
+    return np.array(sortedEigvals), np.array(sortedEigvecs)
 
 # 2.26.2016 taken from analyzeSparsenessProblem.py
 # 4.19.2011
@@ -814,17 +815,17 @@ def drawNetworkFromMatrix(mat,scoreListSize=None,scoreListColor=None,   \
     G = AGraph(maxiter=100000,epsilon=1e-7,**kwargs)
     num = len(mat)
     if scoreListSize is None:
-        sizes = scipy.ones(num)/5.
+        sizes = np.ones(num)/5.
     else:
-        sizes = scipy.sqrt(scipy.array(scoreListSize))
+        sizes = np.sqrt(np.array(scoreListSize))
     if scoreListColor is None:
-        colors = scipy.ones(num)
+        colors = np.ones(num)
     else:
-        colors = scipy.array(scoreListColor)/max(scoreListColor)*cmap.N
+        colors = np.array(scoreListColor)/max(scoreListColor)*cmap.N
     if nodeNames is None:
-        nodeNames = scipy.repeat('',num)
+        nodeNames = np.repeat('',num)
     if edgeWidths is None:
-        edgeWidths = scipy.ones_like(mat)
+        edgeWidths = np.ones_like(mat)
     for i in range(num):
       RGBHcolor = cmap(int(colors[i]))
       fillcolor=RGBHdecimal2hex(RGBHcolor)
