@@ -27,7 +27,7 @@ def gifsicleAnnotate(fileList,annotateList=None,filename='gifsicle_animation.gif
     delay (25)              : Delay between frames in hundredths
                               of a second.
     openFile (True)         : Use OSX's "open" command to show the resulting gif
-    convertOptions ([])     : List of strings to pass to imageMagick's 'convert'.
+    convertOptions ([])     : List of strings to pass to imageMagick's 'magick'.
                               (e.g. ["-resize","1000x1000","-density","1000"])
     """
     if annotateList is None:
@@ -38,7 +38,7 @@ def gifsicleAnnotate(fileList,annotateList=None,filename='gifsicle_animation.gif
     for file,annotation in zip(fileList,annotateList):
         
         # convert to gif using imagemagick's "convert"
-        convertCall = ["convert"]
+        convertCall = ["magick"]
         convertCall += convertOptions
         if annotation is None:
             convertCall += [file,file+".gif"]
